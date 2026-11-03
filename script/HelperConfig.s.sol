@@ -6,7 +6,6 @@ import {MockV3Aggregator} from "../test/mocks/MockV3Aggregator.sol";
 import {ERC20Mock} from "@openzeppelin/mocks/token/ERC20Mock.sol";
 
 contract HelperConfig is Script {
-
     struct NetworkConfig {
         address wethUsdPriceFeed;
         address wbtcUsdPriceFeed;
@@ -21,7 +20,7 @@ contract HelperConfig is Script {
     uint256 public constant DEFAULT_ANVIL_KEY = 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80; // default key for anvil
 
     NetworkConfig public activeNetworkConfig;
-    
+
     constructor() {
         if (block.chainid == 11155111) {
             activeNetworkConfig = getSepoliaEthConfig();
@@ -29,7 +28,7 @@ contract HelperConfig is Script {
             activeNetworkConfig = getOrCreateAnvilConfig();
         }
     }
-    
+
     function getSepoliaEthConfig() public view returns (NetworkConfig memory) {
         return NetworkConfig({
             wethUsdPriceFeed: 0x694AA1769357215DE4FAC081bf1f309aDC325306,
@@ -62,5 +61,4 @@ contract HelperConfig is Script {
             deployerKey: DEFAULT_ANVIL_KEY
         });
     }
-
 }

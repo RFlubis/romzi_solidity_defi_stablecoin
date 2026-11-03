@@ -9,7 +9,6 @@
 // import {HelperConfig} from "../../script/HelperConfig.s.sol";
 // import {IERC20} from "@openzeppelin/token/ERC20/IERC20.sol";
 
-
 // /**
 //  * @title InvariantsTest
 //  * @author Romzi Fauzi Lubis
@@ -43,6 +42,5 @@
 //         assert(totalValue >= totalSupply);
 
 //     }
-
 
 // }

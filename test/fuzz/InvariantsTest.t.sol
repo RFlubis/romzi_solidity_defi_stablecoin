@@ -11,7 +11,6 @@ import {ERC20Mock} from "@openzeppelin/mocks/token/ERC20Mock.sol";
 import {Handler} from "./Handler.t.sol";
 import {console} from "forge-std/console.sol";
 
-
 contract InvariantsTest is StdInvariant, Test {
     DeployDSC deployer;
     DSCEngine dsce;
@@ -32,7 +31,7 @@ contract InvariantsTest is StdInvariant, Test {
     function setUp() external {
         deployer = new DeployDSC();
         (dsc, dsce, config) = deployer.run();
-        (,,weth,wbtc,) = config.activeNetworkConfig();
+        (,, weth, wbtc,) = config.activeNetworkConfig();
         handler = new Handler(dsce, dsc);
         targetContract(address(handler));
     }
@@ -52,7 +51,6 @@ contract InvariantsTest is StdInvariant, Test {
 
         uint256 totalValue = wethValue + wbtcValue;
         assert(totalValue >= totalSupply);
-
     }
 
     function invariant_gettersShouldNotRevert() public view {
@@ -64,5 +62,4 @@ contract InvariantsTest is StdInvariant, Test {
         dsce.getMinHealthFactor();
         dsce.getDsc();
     }
-
 }

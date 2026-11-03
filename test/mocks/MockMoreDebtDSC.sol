@@ -1,12 +1,10 @@
 // SPDX-License-Identifier: MIT
 
-
 pragma solidity ^0.8.20;
 
-import { ERC20Burnable, ERC20 } from "@openzeppelin/token/ERC20/extensions/ERC20Burnable.sol";
-import { Ownable } from "@openzeppelin/access/Ownable.sol";
-import { MockV3Aggregator } from "./MockV3Aggregator.sol";
-
+import {ERC20Burnable, ERC20} from "@openzeppelin/token/ERC20/extensions/ERC20Burnable.sol";
+import {Ownable} from "@openzeppelin/access/Ownable.sol";
+import {MockV3Aggregator} from "./MockV3Aggregator.sol";
 
 contract MockMoreDebtDSC is ERC20Burnable, Ownable {
     error DecentralizedStableCoin__AmountMustBeMoreThanZero();

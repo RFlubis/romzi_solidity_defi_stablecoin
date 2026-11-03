@@ -50,7 +50,7 @@ contract Handler is Test {
         address sender = usersWithDepositsCollateral[addressSeed % usersWithDepositsCollateral.length];
         (uint256 totalCollateralValueInUsd, uint256 totalDscMinted) = dsce.getAccountInformation(sender);
         int256 maxDscToMint = (int256(totalCollateralValueInUsd) / 2) - int256(totalDscMinted);
-        
+
         if (maxDscToMint < 0) {
             return;
         }
@@ -68,11 +68,12 @@ contract Handler is Test {
         ERC20Mock collateral = _getCollateralFromSeed(collateralSeed);
         uint256 maxCollateral = dsce.getCollateralBalanceOfUser(address(collateral), msg.sender);
         amount = bound(amount, 0, maxCollateral);
-        if(amount == 0) {
+        if (amount == 0) {
             return;
         }
         dsce.redeemCollateral(address(collateral), amount);
     }
+
     // this will break all the invariants test suite
     // function updateCollateralPrice(uint96 newPrice) public {
     //     int256 newPriceInt = int256(uint256(newPrice));
@@ -87,5 +88,4 @@ contract Handler is Test {
             return wbtc;
         }
     }
-
 }

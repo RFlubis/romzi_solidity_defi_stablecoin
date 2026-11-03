@@ -8,13 +8,13 @@ import {DSCEngine} from "../../src/DSCEngine.sol";
 import {HelperConfig} from "../../script/HelperConfig.s.sol";
 // import {ERC20Mock} from "@openzeppelin/mocks/token/ERC20Mock.sol";
 // import {MockERC20ReturnsFalse} from "../mocks/MockERC20ReturnsFalse.sol";
-import { ERC20Mock } from "../mocks/ERC20Mock.sol";
-import { StdCheats } from "forge-std/StdCheats.sol";
-import { MockV3Aggregator } from "../mocks/MockV3Aggregator.sol";
-import { MockMoreDebtDSC } from "../mocks/MockMoreDebtDSC.sol";
-import { MockFailedMintDSC } from "../mocks/MockFailedMintDSC.sol";
-import { MockFailedTransferFrom } from "../mocks/MockFailedTransferFrom.sol";
-import { MockFailedTransfer } from "../mocks/MockFailedTransfer.sol";
+import {ERC20Mock} from "../mocks/ERC20Mock.sol";
+import {StdCheats} from "forge-std/StdCheats.sol";
+import {MockV3Aggregator} from "../mocks/MockV3Aggregator.sol";
+import {MockMoreDebtDSC} from "../mocks/MockMoreDebtDSC.sol";
+import {MockFailedMintDSC} from "../mocks/MockFailedMintDSC.sol";
+import {MockFailedTransferFrom} from "../mocks/MockFailedTransferFrom.sol";
+import {MockFailedTransfer} from "../mocks/MockFailedTransfer.sol";
 
 contract DSCEngineTest is Test {
     DeployDSC deployer;
@@ -27,9 +27,10 @@ contract DSCEngineTest is Test {
     address wbtc;
 
     event CollateralDeposited(address indexed user, address indexed token, uint256 indexed amount);
-    event CollateralRedeemed(address indexed redeemFrom, address indexed redeemTo, address indexed token, uint256 amount); // if
+    event CollateralRedeemed(
+        address indexed redeemFrom, address indexed redeemTo, address indexed token, uint256 amount
+    ); // if
     // redeemFrom != redeemedTo, then it was liquidated
-
 
     address public user = address(1);
     uint256 amountCollateral = 10 ether;
@@ -37,7 +38,7 @@ contract DSCEngineTest is Test {
     uint256 public constant STARTING_USER_BALANCE = 10 ether;
     uint256 public constant MIN_HEALTH_FACTOR = 1e18;
 
-        // Liquidation
+    // Liquidation
     address public liquidator = makeAddr("liquidator");
     uint256 public collateralToCover = 20 ether;
     uint256 public constant LIQUIDATION_THRESHOLD = 50;
@@ -45,9 +46,9 @@ contract DSCEngineTest is Test {
     function setUp() external {
         deployer = new DeployDSC();
         (dsc, dscEngine, config) = deployer.run();
-        (ethUsdPriceFeed,btcUsdPriceFeed,weth,wbtc, ) = config.activeNetworkConfig();
+        (ethUsdPriceFeed, btcUsdPriceFeed, weth, wbtc,) = config.activeNetworkConfig();
 
-         if (block.chainid == 31_337) {
+        if (block.chainid == 31_337) {
             vm.deal(user, STARTING_USER_BALANCE);
         }
         // Should we put our integration tests here?
@@ -65,7 +66,6 @@ contract DSCEngineTest is Test {
         // }
         ERC20Mock(weth).mint(user, STARTING_USER_BALANCE);
         ERC20Mock(wbtc).mint(user, STARTING_USER_BALANCE);
- 
     }
 
     /////////////////////
@@ -80,29 +80,23 @@ contract DSCEngineTest is Test {
         feedAddresses.push(btcUsdPriceFeed);
         vm.expectRevert(DSCEngine.DSCEngine__TokenAddressAndPriceFeedAddressMustBeSameLength.selector);
         new DSCEngine(feedAddresses, tokenAddresses, address(dsc));
-    }    
+    }
 
     ////////////////////
     // Price Feed Tests/
     ////////////////////
 
-    function testGetUsdValue() view public {
+    function testGetUsdValue() public view {
         uint256 ethAmount = 15e18;
         uint256 expectedUsd = 30000e18; // 15 ETH * $2000/ETH = $30,000 or 30,000e18 in gwei
-        uint256 actualUsd = dscEngine.getUsdValue(
-            weth,
-            ethAmount
-        );
+        uint256 actualUsd = dscEngine.getUsdValue(weth, ethAmount);
         assertEq(expectedUsd, actualUsd);
     }
 
-    function testGetTokenAmountFromUsd() view public {
+    function testGetTokenAmountFromUsd() public view {
         uint256 usdAmount = 100 ether;
-        uint256 expectedEth =0.05 ether;
-        uint256 actualEth = dscEngine.getTokenAmountFromUsd(
-            weth,
-            usdAmount
-        );
+        uint256 expectedEth = 0.05 ether;
+        uint256 actualEth = dscEngine.getTokenAmountFromUsd(weth, usdAmount);
         assertEq(expectedEth, actualEth);
     }
 
@@ -175,7 +169,6 @@ contract DSCEngineTest is Test {
         vm.stopPrank();
     }
 
-
     ///////////////////////////////////////
     // depositCollateralAndMintDsc Tests //
     ///////////////////////////////////////
@@ -189,7 +182,8 @@ contract DSCEngineTest is Test {
         // forge-lint: disable-next-line(unsafe-typecast)
         uint256 priceUint256 = uint256(price);
 
-        amountToMint = (amountCollateral * (priceUint256 * dscEngine.getAdditionalFeedPrecision())) / dscEngine.getPrecision();
+        amountToMint =
+            (amountCollateral * (priceUint256 * dscEngine.getAdditionalFeedPrecision())) / dscEngine.getPrecision();
 
         vm.startPrank(user);
         ERC20Mock(weth).approve(address(dscEngine), amountCollateral);
@@ -197,7 +191,9 @@ contract DSCEngineTest is Test {
         uint256 expectedHealthFactor =
             dscEngine.calculateHealthFactor(amountToMint, dscEngine.getUsdValue(weth, amountCollateral));
 
-        vm.expectRevert(abi.encodeWithSelector(DSCEngine.DSCEngine__HealthFactorIsBroken.selector, expectedHealthFactor));
+        vm.expectRevert(
+            abi.encodeWithSelector(DSCEngine.DSCEngine__HealthFactorIsBroken.selector, expectedHealthFactor)
+        );
         dscEngine.depositCollateralAndMintDsc(weth, amountCollateral, amountToMint);
         vm.stopPrank();
     }
@@ -255,14 +251,17 @@ contract DSCEngineTest is Test {
         // forge-lint: disable-next-line(unsafe-typecast)
         uint256 priceUint256 = uint256(price);
 
-        amountToMint = (amountCollateral * (priceUint256 * dscEngine.getAdditionalFeedPrecision())) / dscEngine.getPrecision();
+        amountToMint =
+            (amountCollateral * (priceUint256 * dscEngine.getAdditionalFeedPrecision())) / dscEngine.getPrecision();
 
         vm.startPrank(user);
 
         uint256 expectedHealthFactor =
             dscEngine.calculateHealthFactor(amountToMint, dscEngine.getUsdValue(weth, amountCollateral));
 
-        vm.expectRevert(abi.encodeWithSelector(DSCEngine.DSCEngine__HealthFactorIsBroken.selector, expectedHealthFactor));
+        vm.expectRevert(
+            abi.encodeWithSelector(DSCEngine.DSCEngine__HealthFactorIsBroken.selector, expectedHealthFactor)
+        );
 
         dscEngine.mintDsc(amountToMint);
         vm.stopPrank();
@@ -283,7 +282,9 @@ contract DSCEngineTest is Test {
         // Try to mint — should revert because health factor will be broken.
         // With 0 collateral, the health factor will be 0
         uint256 expectedHealthFactor = dscEngine.calculateHealthFactor(amountToMint, 0);
-        vm.expectRevert(abi.encodeWithSelector(DSCEngine.DSCEngine__HealthFactorIsBroken.selector, expectedHealthFactor));
+        vm.expectRevert(
+            abi.encodeWithSelector(DSCEngine.DSCEngine__HealthFactorIsBroken.selector, expectedHealthFactor)
+        );
         dscEngine.mintDsc(amountToMint);
 
         vm.stopPrank();
@@ -470,10 +471,7 @@ contract DSCEngineTest is Test {
         dsc.approve(address(dscEngine), amountToMint);
 
         vm.expectRevert(
-            abi.encodeWithSelector(
-                DSCEngine.DSCEngine__HealthFactorOk.selector,
-                dscEngine.getHealthFactor(user)
-            )
+            abi.encodeWithSelector(DSCEngine.DSCEngine__HealthFactorOk.selector, dscEngine.getHealthFactor(user))
         );
         dscEngine.liquidate(weth, user, amountToMint);
         vm.stopPrank();
@@ -521,19 +519,19 @@ contract DSCEngineTest is Test {
         uint256 usdAmountLiquidated = dscEngine.getUsdValue(weth, amountLiquidated);
         uint256 expecteduserCollateralValueInUsd = dscEngine.getUsdValue(weth, amountCollateral) - (usdAmountLiquidated);
 
-        ( uint256 userCollateralValueInUsd, ) = dscEngine.getAccountInformation(user);
+        (uint256 userCollateralValueInUsd,) = dscEngine.getAccountInformation(user);
         uint256 hardCodedExpectedValue = 70_000_000_000_000_000_020;
         assertEq(userCollateralValueInUsd, expecteduserCollateralValueInUsd);
         assertEq(userCollateralValueInUsd, hardCodedExpectedValue);
     }
 
     function testLiquidatorTakesOnusersDebt() public liquidated {
-        (,uint256 liquidatorDscMinted) = dscEngine.getAccountInformation(liquidator);
+        (, uint256 liquidatorDscMinted) = dscEngine.getAccountInformation(liquidator);
         assertEq(liquidatorDscMinted, amountToMint);
     }
 
     function testuserHasNoMoreDebt() public liquidated {
-        (,uint256 userDscMinted) = dscEngine.getAccountInformation(user);
+        (, uint256 userDscMinted) = dscEngine.getAccountInformation(user);
         assertEq(userDscMinted, 0);
     }
 
@@ -561,7 +559,7 @@ contract DSCEngineTest is Test {
     }
 
     function testGetAccountCollateralValueFromInformation() public depositCollateral {
-        (uint256 collateralValue, ) = dscEngine.getAccountInformation(user);
+        (uint256 collateralValue,) = dscEngine.getAccountInformation(user);
         uint256 expectedCollateralValue = dscEngine.getUsdValue(weth, amountCollateral);
         assertEq(collateralValue, expectedCollateralValue);
     }
